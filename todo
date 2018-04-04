@@ -1,7 +1,7 @@
-[x] gan class with easy to update network architectures
-[ ] impliment semi-supervised learning
-[ ] minibatch discrimination
-[ ] one sided label smoothing
-[ ] virtual batch normalization on generator network
-[ ] historical averaging
-[ ] feature matching
+- [x] gan class with easy to update network architectures
+- [ ] impliment semi-supervised learning
+- [ ] minibatch discrimination
+- [ ] one sided label smoothing
+- [ ] virtual batch normalization on generator network
+- [ ] historical averaging
+- [ ] feature matching
