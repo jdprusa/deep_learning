@@ -3,6 +3,10 @@ from keras.models import Model
 
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import metrics
+
+def auc(y_true, y_pred):
+    return metrics.roc_auc_score(y_true, y_pred)
 
 class GAN():
     def __init__(self, discriminator, generator):
@@ -31,7 +35,7 @@ class GAN():
         self.combined = Model(z, valid)
         self.combined.compile(loss=loss, optimizer=optimizer)
 
-    def train(self, X_train, epochs, batch_size=128, save_interval=0):
+    def train(self, X_train, epochs, batch_size=128, save_interval=0, val_data=None):
 
       
         half_batch = int(batch_size / 2)
@@ -51,11 +55,18 @@ class GAN():
             # Generate a half batch of new images
             gen_imgs = self.generator.predict(noise)
 
-            # Train the discriminator
+            # Train the discriminator, construct different mini=batches for real and fake
             d_loss_real = self.discriminator.train_on_batch(imgs, np.ones((half_batch, 1)))
             d_loss_fake = self.discriminator.train_on_batch(gen_imgs, np.zeros((half_batch, 1)))
             d_loss = 0.5 * np.add(d_loss_real, d_loss_fake)
-
+            
+            # calculate validation auc if applicable
+            val_auc = 0
+            if val_data != None and epoch % val_data[2] == 0:
+                x_val = val_data[0]
+                y_val = val_data[1]
+                y_pred = self.discriminator.predict(x_val)
+                val_auc = auc(y_val, y_pred)
 
             # ---------------------
             #  Train Generator
@@ -71,8 +82,11 @@ class GAN():
             g_loss = self.combined.train_on_batch(noise, valid_y)
 
             # Plot the progress
-            print ("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
-
+            if val_data != None and epoch % val_data[2] == 0:
+                print ("%d [D loss: %f, acc.: %.2f%%, validation auc: %.3f%%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], val_auc, g_loss))
+            else:
+                print ("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
+            
             # If at save interval => save generated image samples
             if save_interval != 0:
                 if epoch % save_interval == 0:
