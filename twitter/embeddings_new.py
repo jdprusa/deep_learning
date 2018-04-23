@@ -1,44 +1,43 @@
+# log(m) text embedding for character level deep learning        
+# contains two embedding versions and functions for transforming 
+#  datasets within training batches, or prior to training        
+
 import csv
 import numpy as np
 np.random.seed(7)  # for reproducibility
 import string
 import argparse
 
+# log(m) text embedding with chopping/padding to specific length
 def text2image(text, max_len):
-   #print "Converting to image format 8x longest tweet"
     image = np.zeros((8, max_len), dtype=np.int8)
-    #print text
     for index, character in enumerate(text):
-        #print index
         if index < max_len:
             y = list(bin(ord(character)))
             if len(y) <=10:
                 for j in range(2,min(8,len(y))):
                     image[j-2, index] = int(y[len(y)+1-j])
-    #print image.shape
     return image
     
+# log(m) text embedding, no chopping/padding
 def text2image_old(text):
-   #print "Converting to image format 8x longest tweet"
     image = np.zeros((8, len(text)), dtype=np.int8)
-    #print text
     for index, character in enumerate(text):
-        #print index
         y = list(bin(ord(character)))
         if len(y) <=10:
             for j in range(2,min(8,len(y))):
                 image[j-2, index] = int(y[len(y)+1-j])
-    #print image.shape
+
     return image
     
+# Loads entire dataset and applies character embedding 
+# memory inefficient, cpu efficient
 def load_dataset(data_file, max_len=50, stride=50, chop_text='chop'):
     print("Loading Dataset")
-    #max_len = 0
     data =[]
     with open(data_file) as file:
         f = csv.reader(file)
         print("Converting to image format")
-        #count = 0
         if chop_text == 'full_pad':
             print("padded to maximum instance length embedding")
             for line in f:
@@ -85,6 +84,8 @@ def load_dataset(data_file, max_len=50, stride=50, chop_text='chop'):
     print(X.shape)
     return X, Y, max_len
   
+# performs character embedding on within training batches
+# memory efficient, cpu inefficient
 def batch_embedding(batch_data, batch_labels, max_len, stride, chop_text):
     data =[]
     chunks=1
@@ -108,10 +109,7 @@ def batch_embedding(batch_data, batch_labels, max_len, stride, chop_text):
                 labels.append(batch_labels[i])
             chunks.append(chunk_count)
             chunk_check = {}
-
-              
-
-            
+   
     else:
         labels = batch_labels
         for text in batch_data:
@@ -128,6 +126,7 @@ def batch_embedding(batch_data, batch_labels, max_len, stride, chop_text):
     
     return data, labels, chunks
 
+# saves character embedded data to plaintext file for future use.    
 def output_to_file(path, x, y):
     print("Writing out output file")
     with open(path, 'w') as outfile:
@@ -142,11 +141,7 @@ def main():
     X, Y, _ = load_dataset(data_file = FLAGS.input_data_dir, max_len=FLAGS.max_len, stride=FLAGS.conv_stride, chop_text=FLAGS.chop_text)
     print(X[0].shape, X.shape, Y[0], Y.shape)
     print(X[0])
-    #X=text2image("test input", FLAGS.max_len)
-    #print(X)
-    #print(X.shape)
-    #X = X.reshape(-1, 8, FLAGS.max_len, 1)
-    #print(X.shape)
+
 
     
 if __name__ == "__main__":
