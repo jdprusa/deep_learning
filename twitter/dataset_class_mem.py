@@ -1,3 +1,6 @@
+# Dataset class for deep learning with Keras with a Tensorflow Backend 
+# generates train, test and validation splits, and training batches    
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -11,10 +14,8 @@ from tensorflow.contrib.learn.python.learn.datasets import base
 from tensorflow.python.framework import dtypes
 from tensorflow.python.framework import random_seed
 
-"""
-simplified mnist DataSet class for general use
-num_examples is probably not needed
-"""
+
+#DataSet class for general use with any data
 class DataSet(object):
 
     def __init__(self, data, labels):      
@@ -39,9 +40,8 @@ class DataSet(object):
     @property
     def epochs_completed(self):
         return self._epochs_completed
-
+    # Return the next `batch_size` examples from this data set.
     def next_batch(self, batch_size, max_len, stride, chop_text, shuffle=True):
-        """Return the next `batch_size` examples from this data set."""
         start = self._index_in_epoch
         # Shuffle for the first epoch
         if self._epochs_completed == 0 and start == 0 and shuffle:			
@@ -57,7 +57,7 @@ class DataSet(object):
             data_rest_part = self._data[start:self._num_examples]
             labels_rest_part = self._labels[start:self._num_examples]
             # Shuffle the data
-            if shuffle:								#shuffles data again
+            if shuffle:								
                 c = list(zip(self._data, self._labels))
                 numpy.random.shuffle(c)
                 self._data, self._labels = zip(*c)
@@ -77,11 +77,10 @@ class DataSet(object):
             text_data, labels_, chunks = embeddings_new.batch_embedding(text_data, labels, max_len, stride, chop_text)
             return text_data, numpy.asarray(labels_, dtype=numpy.int8), numpy.asarray(labels, dtype=numpy.int8), chunks
             
-""" 
-generic dataloader for DataSet Class
-requires data, labels as nparrays
-validation_size and test_size determine how much of the data will be set aside for validation and testing
-"""
+ 
+# generic dataloader for DataSet Class
+# requires data, labels as nparrays
+# validation_size and test_size determine how much of the data will be set aside for validation and testing
 def read_data_sets(data, labels,
                    validation_split=0.2,
                    test_split=0.1):
@@ -117,7 +116,6 @@ def read_data_sets(data, labels,
     validation = DataSet(validation_data, validation_labels)
     test = DataSet(test_data, test_labels)
     
-    #print(validation_size, test_size)
-    #print(train_data.shape, test_data.shape, validation_data.shape)
+
 
     return base.Datasets(train=train, validation=validation, test=test)
