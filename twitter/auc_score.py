@@ -1,3 +1,4 @@
+# script for calculating AUC scores from softmax output of 2 class classification with DNNs 
 import sklearn.metrics as metrics
 import numpy as np
 import os
