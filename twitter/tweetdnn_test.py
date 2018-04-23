@@ -1,3 +1,7 @@
+# compares performance of existing models using conventional classification with a character level DNN
+# against classification with convolutional window classification (CWC) with a character level DNN
+
+
 from __future__ import print_function
 
 import keras
@@ -8,17 +12,20 @@ import load_text
 import numpy as np
 import os
 
-#parameters
+#hyperparameters
 batch_size = 100
 num_classes = 2
+
+#location of models being evaluated
 model_dir = ""
 
-
+# custom batch generator that peforms character embedding within each batch for memory efficiency
 def generator(data, max_len, batch_size):
   while True:
     text, labels_, labels, chunks = data.next_batch(batch_size, max_len, max_len, 'chop', shuffle=False)
     yield text, keras.utils.to_categorical(labels, num_classes)
     
+# calculates accuracy with convolutional window classification    
 def conv_accuracy(test, model, max_len, stride, steps_per_epoch):
   total = 0
   correct = 0
@@ -45,6 +52,8 @@ def conv_accuracy(test, model, max_len, stride, steps_per_epoch):
             
   return correct/total
   
+  
+# prints output of network to file for evaluation with additional classification metrics  
 def conv_output(test, model, max_len, stride, steps_per_epoch, scenario):
   total = 0
   correct = 0
@@ -71,16 +80,14 @@ def conv_output(test, model, max_len, stride, steps_per_epoch, scenario):
 
 def main():
   print("train_set, max_len, test_set, accuracy, conv_accuracy")
-    #model_name = "amazon0150.h5"
   for model_name in os.listdir(model_dir):
     model_len = len(model_name)
     max_len = int(model_name[model_len-7:model_len-3])
     
     #load model 
     model = load_model(model_dir+model_name)
-    #evaluate on test data
-  
-    # test sets
+    
+    # paths for each dataset)
     test_sets = {}
     test_sets['SemEval'] = ""
     test_sets['amazon'] = ""
@@ -112,8 +119,6 @@ def main():
           print(str(scores[i][0])+","+str(scores[i][1])+","+str(int(test.labels[i])), file=out)
       conv_output(test, model, max_len, max_len, steps_per_epoch, scenario) 
  
-
-  #avoid randomly occuring error at end of code
   K.clear_session()
     
 if __name__ == "__main__":
