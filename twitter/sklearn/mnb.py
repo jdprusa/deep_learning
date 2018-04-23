@@ -1,3 +1,6 @@
+# train and evaluate multinomial naive bayes classifiers with a variety   
+# of bag-of-words feature sets to benchmark each datasets using sklearn 
+
 from __future__ import print_function
 
 import csv
@@ -7,17 +10,16 @@ from sklearn.model_selection import KFold
 import numpy as np
 import time
 
-
 print("loading data")
 
 training_data = {}
 
+# paths for each dataset
 training_data['sent140_100k'] = ''
 training_data['SemEval'] = ''
 training_data['sent140Full'] = ''
 training_data['amazon'] = ''
 training_data['yelp'] = ''
-
 
 out_file = open("output_datasets_u.csv", 'w')
 print("dataset,ngrams,num_features,accuracy", file=out_file)
