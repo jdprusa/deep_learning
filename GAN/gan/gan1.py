@@ -35,7 +35,7 @@ class GAN():
         self.combined = Model(z, valid)
         self.combined.compile(loss=loss, optimizer=optimizer)
 
-    def train(self, X_train, epochs, batch_size=128, save_interval=0, val_data=None):
+    def train(self, X_train, epochs=10, batch_size=128, save_interval=0, val_data=None):
 
       
         half_batch = int(batch_size / 2)
@@ -65,6 +65,7 @@ class GAN():
             if val_data != None and epoch % val_data[2] == 0:
                 x_val = val_data[0]
                 y_val = val_data[1]
+                #val_auc = self.discriminator.evaluate(x_val, y_val, verbose=0)[1]
                 y_pred = self.discriminator.predict(x_val)
                 val_auc = auc(y_val, y_pred)
 
@@ -83,14 +84,13 @@ class GAN():
 
             # Plot the progress
             if val_data != None and epoch % val_data[2] == 0:
-                print ("%d [D loss: %f, acc.: %.2f%%, validation auc: %.3f%%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], val_auc, g_loss))
+                print ("%d [D loss: %f, acc.: %.2f%%, validation acc: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], 100*val_auc, g_loss))
             else:
                 print ("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
             
             # If at save interval => save generated image samples
-            if save_interval != 0:
-                if epoch % save_interval == 0:
-                    self.save_imgs(epoch)
+            if save_interval != 0 and epoch % save_interval == 0:
+                self.save_imgs(epoch)
                     
     def create_fake(self, number_of_fake=10):
         noise = np.random.normal(0, 1, (number_of_fake, 100))
