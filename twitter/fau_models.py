@@ -1,3 +1,6 @@
+# DNN model architecture used for log(m) character embedding paper
+# architectures in current/ongoing research have been removed
+
 import  keras
 from keras.models import (
     Sequential
@@ -12,12 +15,9 @@ from keras.layers.convolutional import (
     MaxPooling2D,
 )
 
-
+ # simple deep NN for text classification using character level embedding
+ # 2 blocks of 3 Conv layers followed by 2x2 maxpooling, then 3 fully connected layers
 def text_cnn_big(input_shape, num_classes):
-    """
-    simple deep NN for text classification using character level embedding
-    2 blocks of 3 Conv layers followed by 2x2 maxpooling, then 3 fully connected layers
-    """
     model = Sequential()
     model.add(Conv2D(128, kernel_size=(3, 3),
                  activation='relu',
